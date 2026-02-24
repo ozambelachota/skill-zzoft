@@ -1,43 +1,73 @@
 # Skills Zzoft - Wiki
 
-Bienvenido a la documentacion de las skills personalizadas de OpenCode para los proyectos del CITE.
+Documentacion de las skills personalizadas para los proyectos del CITE.
 
-## Que es una Skill de OpenCode?
+Estas skills son compatibles con los 3 principales agentes de IA para desarrollo:
 
-Una skill es un paquete modular que extiende las capacidades del agente de IA (OpenCode/Claude Code) con conocimiento especializado, workflows y herramientas. Pensalo como una "guia de onboarding" para un dominio especifico: transforma al agente de proposito general en un agente especializado.
+| Agente | Proveedor | Estandar |
+|--------|-----------|----------|
+| [OpenCode](https://github.com/sst/opencode) | Open Source | [Agent Skills](https://agentskills.io) |
+| [Claude Code](https://docs.anthropic.com/en/docs/claude-code/skills) | Anthropic | [Agent Skills](https://agentskills.io) |
+| [Codex CLI](https://developers.openai.com/codex/skills) | OpenAI | [Agent Skills](https://agentskills.io) |
 
-### Que proveen las Skills?
-
-- **Workflows especializados**: Procedimientos multi-paso para dominios especificos
-- **Conocimiento de dominio**: Patrones de arquitectura, convenciones y reglas del equipo
-- **Recursos empaquetados**: Scripts, referencias y templates reutilizables
+Los tres siguen el estandar abierto **Agent Skills** — el mismo archivo `SKILL.md` funciona en los tres agentes. Solo cambia la ruta donde se instalan.
 
 ## Skills disponibles
 
-| Skill | Descripcion | Pagina |
-|-------|-------------|--------|
-| `dotnet-clean-cqrs` | Microservicios .NET 9.0 con Clean Architecture + CQRS | [Ver documentacion](Skill-dotnet-clean-cqrs) |
-| `java-hexagonal-secure` | Java Spring Boot con Hexagonal Architecture + DB segura | [Ver documentacion](Skill-java-hexagonal-secure) |
+| Skill | Descripcion | Tecnologia |
+|-------|-------------|------------|
+| `dotnet-clean-cqrs` | Microservicios .NET 9.0 con Clean Architecture + CQRS | C# / .NET 9.0 |
+| `java-hexagonal-secure` | Java Spring Boot con Hexagonal Architecture + DB segura | Java / Spring Boot |
 
-## Guias
+## Paginas de la Wiki
 
-- [Guia de Instalacion paso a paso (Windows, Mac, Linux)](Guia-de-Instalacion)
+- [Guia de Instalacion paso a paso](Guia-de-Instalacion) — Windows, macOS y Linux para OpenCode, Claude Code y Codex
+- [Skill: dotnet-clean-cqrs](Skill-dotnet-clean-cqrs) — Documentacion y uso
+- [Skill: java-hexagonal-secure](Skill-java-hexagonal-secure) — Documentacion y uso
 
-## Como se activan las Skills?
+## Repositorio de Skills
 
-Las skills se activan **automaticamente** cuando el agente detecta contexto relevante. Por ejemplo:
+El codigo fuente de las skills esta en: [skill-zzoft](https://github.com/ozambelachota/skill-zzoft)
 
-- Si le pedis "crea un microservicio en .NET con CQRS", se activa `dotnet-clean-cqrs`
-- Si le pedis "crea un servicio Java con arquitectura hexagonal", se activa `java-hexagonal-secure`
+## Como se activan?
 
-Tambien podes activarlas manualmente desde OpenCode escribiendo `/skill` y seleccionando la que necesites.
+Las skills se activan **automaticamente** cuando el agente detecta contexto relevante en tu prompt:
+
+```
+# Esto activa dotnet-clean-cqrs automaticamente
+"Crea un microservicio .NET con CQRS para gestionar productos"
+
+# Esto activa java-hexagonal-secure automaticamente
+"Crea un servicio Java Spring Boot con arquitectura hexagonal"
+```
+
+Tambien se pueden invocar manualmente:
+
+| Agente | Invocacion manual |
+|--------|-------------------|
+| OpenCode | Escribir `/skill` y seleccionar |
+| Claude Code | Escribir `/nombre-skill` o preguntar "que skills hay disponibles?" |
+| Codex | Escribir `$nombre-skill` o `/skills` para listar |
 
 ## Estructura de una Skill
 
+Todas las skills siguen esta estructura (estandar Agent Skills):
+
 ```
 nombre-skill/
-├── SKILL.md          # Archivo principal (requerido)
-├── assets/           # Templates, scripts de build, etc.
+├── SKILL.md          # Instrucciones principales (REQUERIDO)
+├── assets/           # Templates, scripts de build
 ├── references/       # Documentacion de referencia
 └── scripts/          # Scripts ejecutables
+```
+
+El archivo `SKILL.md` debe tener frontmatter YAML con `name` y `description`:
+
+```yaml
+---
+name: mi-skill
+description: Que hace y cuando debe activarse.
+---
+
+Instrucciones para el agente...
 ```

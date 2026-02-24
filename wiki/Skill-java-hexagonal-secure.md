@@ -2,11 +2,25 @@
 
 Genera servicios Java Spring Boot con Arquitectura Hexagonal (Ports & Adapters) y configuracion segura de base de datos.
 
+**Compatible con:** OpenCode | Claude Code | Codex
+
 ## Cuando se activa
 
-- Cuando pedis crear un nuevo servicio Java Spring Boot
-- Cuando pedis refactorizar un servicio existente a Arquitectura Hexagonal
-- Cuando pedis configurar acceso a base de datos o cambios de schema
+La skill se activa automaticamente cuando le pedis al agente:
+
+- Crear un nuevo servicio Java Spring Boot
+- Refactorizar un servicio existente a Arquitectura Hexagonal
+- Configurar acceso a base de datos o cambios de schema en Java
+
+### Invocacion manual
+
+| Agente | Comando |
+|--------|---------|
+| OpenCode | `/skill` y seleccionar `java-hexagonal-secure` |
+| Claude Code | `/java-hexagonal-secure` |
+| Codex | `$java-hexagonal-secure` |
+
+---
 
 ## Arquitectura que genera
 
@@ -49,6 +63,8 @@ Domain (Entities, Value Objects)
 - **Application**: Define los puertos (interfaces). Implementa los use cases.
 - **Infrastructure**: Implementa los puertos con tecnologias concretas (JPA, REST, etc).
 
+---
+
 ## Configuracion segura de BD (CRITICO)
 
 La skill **prohibe** usar `spring.jpa.hibernate.ddl-auto=update` o `create` en servicios de produccion.
@@ -74,6 +90,20 @@ spring:
     locations: classpath:db/migration
 ```
 
+### Ejemplo de migracion Flyway
+
+```sql
+-- V1__create_products_table.sql
+CREATE TABLE products (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+---
+
 ## Dependencias estandar
 
 | Dependencia | Proposito |
@@ -84,11 +114,13 @@ spring:
 | `spring-boot-starter-security` | Autenticacion (si aplica) |
 | `lombok` | Reducir boilerplate |
 | `postgresql` | Driver de BD (o el que corresponda) |
+| `flyway-core` | Migraciones de BD |
+
+---
 
 ## Reglas de pureza del Domain
 
 - El paquete `domain` **NO** debe depender de Spring ni de librerias de persistencia
-- Las anotaciones JPA son aceptables SOLO si es pragmaticamente inevitable
 - Se prefiere separar Domain Models de JPA Entities usando **Mappers**
 
 ### Ejemplo: Separacion Domain Model vs JPA Entity
@@ -100,41 +132,107 @@ public class Product {
     private String name;
     private BigDecimal price;
 
-    // Constructor, getters, logica de negocio
     public void applyDiscount(BigDecimal percentage) {
         this.price = this.price.multiply(
             BigDecimal.ONE.subtract(percentage)
         );
     }
 }
+```
 
+```java
 // infrastructure/adapter/output/persistence/entity/ProductEntity.java
 @Entity
 @Table(name = "products")
+@Data
+@NoArgsConstructor
 public class ProductEntity {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private BigDecimal price;
 
-    // Mappers
-    public Product toDomain() { ... }
-    public static ProductEntity fromDomain(Product p) { ... }
+    public Product toDomain() {
+        return new Product(id, name, price);
+    }
+
+    public static ProductEntity fromDomain(Product p) {
+        ProductEntity entity = new ProductEntity();
+        entity.setId(p.getId());
+        entity.setName(p.getName());
+        entity.setPrice(p.getPrice());
+        return entity;
+    }
 }
 ```
 
-## Ejemplo de uso con OpenCode
+### Ejemplo: Puerto e implementacion
+
+```java
+// application/port/output/ProductRepository.java (Puerto)
+public interface ProductRepository {
+    Product save(Product product);
+    Optional<Product> findById(Long id);
+    List<Product> findAll();
+}
+```
+
+```java
+// infrastructure/adapter/output/persistence/ProductRepositoryAdapter.java
+@Component
+@RequiredArgsConstructor
+public class ProductRepositoryAdapter implements ProductRepository {
+    private final JpaProductRepository jpaRepository;
+
+    @Override
+    public Product save(Product product) {
+        ProductEntity entity = ProductEntity.fromDomain(product);
+        return jpaRepository.save(entity).toDomain();
+    }
+
+    @Override
+    public Optional<Product> findById(Long id) {
+        return jpaRepository.findById(id).map(ProductEntity::toDomain);
+    }
+
+    @Override
+    public List<Product> findAll() {
+        return jpaRepository.findAll().stream()
+            .map(ProductEntity::toDomain)
+            .collect(Collectors.toList());
+    }
+}
+```
+
+---
+
+## Ejemplos de uso
+
+### Ejemplo basico
 
 ```
-Prompt: "Crea un microservicio Java Spring Boot para el modulo de ventas
-con arquitectura hexagonal. Usa PostgreSQL como base de datos."
+Crea un microservicio Java Spring Boot para el modulo de ventas
+con arquitectura hexagonal. Usa PostgreSQL como base de datos.
 ```
 
-La skill va a:
+### Ejemplo avanzado
 
-1. Crear la estructura de paquetes hexagonal
-2. Pedir los scripts SQL de inicializacion de la BD
-3. Generar las entidades de dominio SIN dependencias de framework
-4. Crear los puertos (interfaces) en application
-5. Implementar los adaptadores en infrastructure
+```
+Necesito un servicio Java para gestionar el inventario de madera comercial.
+Debe tener:
+- Entidad MaderaComercial con: id, especie, volumen, calidad, lote
+- Arquitectura hexagonal con puertos y adaptadores
+- PostgreSQL con Flyway para migraciones
+- Endpoints: crear, listar, buscar por especie, actualizar calidad
+- No usar ddl-auto=update
+```
+
+### Lo que el agente genera
+
+1. Estructura de paquetes hexagonal completa
+2. Solicitar los scripts SQL de inicializacion
+3. Entidades de dominio SIN dependencias de framework
+4. Puertos (interfaces) en application
+5. Adaptadores en infrastructure con JPA entities separadas
 6. Configurar `application.yml` con `ddl-auto: validate`
+7. Controllers REST en infrastructure/adapter/input

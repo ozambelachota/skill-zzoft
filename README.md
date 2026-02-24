@@ -1,6 +1,8 @@
 # skill-zzoft
 
-Skills personalizadas de OpenCode para los proyectos del CITE - Zzoft.
+Skills personalizadas (Agent Skills) para los proyectos del CITE - Zzoft.
+
+Compatible con **OpenCode**, **Claude Code** y **Codex (OpenAI)** — los tres siguen el estandar abierto [Agent Skills](https://agentskills.io).
 
 ## Skills incluidas
 
@@ -15,13 +17,19 @@ Skills personalizadas de OpenCode para los proyectos del CITE - Zzoft.
 # Clonar el repositorio
 git clone https://github.com/ozambelachota/skill-zzoft.git
 
-# Copiar skills al directorio global de OpenCode
-# Linux/Mac:
+# Copiar skills al directorio global del agente que uses:
+
+# OpenCode (Linux/Mac):
 cp -r skill-zzoft/skills/* ~/.config/opencode/skills/
 
-# Windows (PowerShell):
-Copy-Item -Recurse skill-zzoft\skills\* $env:USERPROFILE\.config\opencode\skills\
+# Claude Code (Linux/Mac):
+cp -r skill-zzoft/skills/* ~/.claude/skills/
+
+# Codex (Linux/Mac):
+cp -r skill-zzoft/skills/* ~/.agents/skills/
 ```
+
+Para Windows y mas opciones, ver la [Guia de Instalacion completa](https://github.com/ozambelachota/skill-zzoft/wiki/Guia-de-Instalacion).
 
 ## Documentacion
 

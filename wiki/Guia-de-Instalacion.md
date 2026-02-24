@@ -1,24 +1,16 @@
 # Guia de Instalacion de Skills - Paso a Paso
 
-Esta guia explica como instalar y configurar las skills de OpenCode en **Windows**, **macOS** y **Linux**.
+Guia completa para instalar las skills de Zzoft en **OpenCode**, **Claude Code** y **Codex (OpenAI)**, en **Windows**, **macOS** y **Linux**.
 
 ---
 
 ## Prerequisitos
 
-Antes de instalar las skills, asegurate de tener:
-
 1. **Git** instalado ([descargar](https://git-scm.com/downloads))
-2. **OpenCode** instalado y configurado (con un proveedor de LLM activo)
-3. Acceso al repositorio de skills
-
-### Verificar que OpenCode esta instalado
-
-```bash
-opencode --version
-```
-
-Si no lo tenes instalado, seguir la documentacion oficial de OpenCode.
+2. Al menos uno de los agentes instalado:
+   - **OpenCode**: `npm i -g opencode` o ver [docs](https://github.com/sst/opencode)
+   - **Claude Code**: `npm i -g @anthropic-ai/claude-code` o ver [docs](https://docs.anthropic.com/en/docs/claude-code/overview)
+   - **Codex CLI**: `npm i -g @openai/codex` o `brew install --cask codex` o ver [docs](https://developers.openai.com/codex)
 
 ---
 
@@ -31,14 +23,7 @@ cd $env:USERPROFILE\Documents
 git clone https://github.com/ozambelachota/skill-zzoft.git
 ```
 
-### macOS (Terminal)
-
-```bash
-cd ~/Documents
-git clone https://github.com/ozambelachota/skill-zzoft.git
-```
-
-### Linux (Terminal)
+### macOS / Linux (Terminal)
 
 ```bash
 cd ~/Documents
@@ -47,141 +32,232 @@ git clone https://github.com/ozambelachota/skill-zzoft.git
 
 ---
 
-## Paso 2: Crear el directorio de skills (si no existe)
+## Paso 2: Elegir donde instalar
 
-OpenCode busca skills en las siguientes ubicaciones (en orden de prioridad):
+Las skills se pueden instalar de dos formas:
 
-| Prioridad | Ubicacion | Alcance |
-|-----------|-----------|---------|
-| 1 | `.opencode/skills/<nombre>/SKILL.md` | Proyecto (solo para ese repo) |
-| 2 | `~/.config/opencode/skills/<nombre>/SKILL.md` | Global (todos los proyectos) |
-| 3 | `.claude/skills/<nombre>/SKILL.md` | Proyecto (compatibilidad Claude) |
-| 4 | `~/.claude/skills/<nombre>/SKILL.md` | Global (compatibilidad Claude) |
+| Alcance | Descripcion | Cuando usar |
+|---------|-------------|-------------|
+| **Global** | Disponible en TODOS tus proyectos | Recomendado para skills del equipo |
+| **Por proyecto** | Solo disponible en ESE proyecto | Para skills especificas de un repo |
 
-Para instalacion **global** (recomendado para skills del equipo):
+### Rutas por agente
 
-### Windows (PowerShell)
+#### Instalacion GLOBAL (recomendado)
+
+| Agente | Windows | macOS / Linux |
+|--------|---------|---------------|
+| OpenCode | `%USERPROFILE%\.config\opencode\skills\` | `~/.config/opencode/skills/` |
+| Claude Code | `%USERPROFILE%\.claude\skills\` | `~/.claude/skills/` |
+| Codex | `%USERPROFILE%\.agents\skills\` | `~/.agents/skills/` |
+
+#### Instalacion POR PROYECTO
+
+| Agente | Ruta (dentro del proyecto) |
+|--------|---------------------------|
+| OpenCode | `.opencode/skills/` |
+| Claude Code | `.claude/skills/` |
+| Codex | `.agents/skills/` |
+
+> **Nota**: Las skills de proyecto tienen prioridad sobre las globales.
+
+---
+
+## Paso 3: Crear directorios e instalar
+
+### Para OpenCode
+
+#### Windows (PowerShell)
 
 ```powershell
-# Crear directorio si no existe
+# Crear directorio global
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.config\opencode\skills"
 
-# Verificar que se creo
-Test-Path "$env:USERPROFILE\.config\opencode\skills"
-# Deberia devolver: True
-```
-
-### macOS (Terminal)
-
-```bash
-# Crear directorio si no existe
-mkdir -p ~/.config/opencode/skills
-
-# Verificar que se creo
-ls -la ~/.config/opencode/skills
-```
-
-### Linux (Terminal)
-
-```bash
-# Crear directorio si no existe
-mkdir -p ~/.config/opencode/skills
-
-# Verificar que se creo
-ls -la ~/.config/opencode/skills
-```
-
----
-
-## Paso 3: Copiar las skills al directorio de OpenCode
-
-### Windows (PowerShell)
-
-```powershell
-# Copiar TODAS las skills
+# Copiar skills
 Copy-Item -Recurse -Force "$env:USERPROFILE\Documents\skill-zzoft\skills\*" "$env:USERPROFILE\.config\opencode\skills\"
 
-# Verificar que se copiaron
+# Verificar
 Get-ChildItem "$env:USERPROFILE\.config\opencode\skills" -Directory
 ```
 
-Resultado esperado:
-
-```
-Directory: C:\Users\TU_USUARIO\.config\opencode\skills
-
-Mode                 LastWriteTime         Length Name
-----                 -------------         ------ ----
-d-----         2/23/2026  12:00 PM                dotnet-clean-cqrs
-d-----         2/23/2026  12:00 PM                java-hexagonal-secure
-```
-
-### macOS (Terminal)
+#### macOS / Linux (Terminal)
 
 ```bash
-# Copiar TODAS las skills
+# Crear directorio global
+mkdir -p ~/.config/opencode/skills
+
+# Copiar skills
 cp -r ~/Documents/skill-zzoft/skills/* ~/.config/opencode/skills/
 
-# Verificar que se copiaron
+# Verificar
 ls ~/.config/opencode/skills/
 ```
 
-Resultado esperado:
-
-```
-dotnet-clean-cqrs    java-hexagonal-secure
-```
-
-### Linux (Terminal)
-
-```bash
-# Copiar TODAS las skills
-cp -r ~/Documents/skill-zzoft/skills/* ~/.config/opencode/skills/
-
-# Verificar que se copiaron
-ls ~/.config/opencode/skills/
-```
-
-Resultado esperado:
-
+**Resultado esperado:**
 ```
 dotnet-clean-cqrs    java-hexagonal-secure
 ```
 
 ---
 
-## Paso 4: Verificar que OpenCode detecta las skills
+### Para Claude Code
 
-1. Abri una terminal en cualquier proyecto
-2. Inicia OpenCode:
+#### Windows (PowerShell)
+
+```powershell
+# Crear directorio global
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills"
+
+# Copiar skills
+Copy-Item -Recurse -Force "$env:USERPROFILE\Documents\skill-zzoft\skills\*" "$env:USERPROFILE\.claude\skills\"
+
+# Verificar
+Get-ChildItem "$env:USERPROFILE\.claude\skills" -Directory
+```
+
+#### macOS / Linux (Terminal)
+
+```bash
+# Crear directorio global
+mkdir -p ~/.claude/skills
+
+# Copiar skills
+cp -r ~/Documents/skill-zzoft/skills/* ~/.claude/skills/
+
+# Verificar
+ls ~/.claude/skills/
+```
+
+**Resultado esperado:**
+```
+dotnet-clean-cqrs    java-hexagonal-secure
+```
+
+---
+
+### Para Codex (OpenAI)
+
+#### Windows (PowerShell)
+
+```powershell
+# Crear directorio global
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills"
+
+# Copiar skills
+Copy-Item -Recurse -Force "$env:USERPROFILE\Documents\skill-zzoft\skills\*" "$env:USERPROFILE\.agents\skills\"
+
+# Verificar
+Get-ChildItem "$env:USERPROFILE\.agents\skills" -Directory
+```
+
+#### macOS / Linux (Terminal)
+
+```bash
+# Crear directorio global
+mkdir -p ~/.agents/skills
+
+# Copiar skills
+cp -r ~/Documents/skill-zzoft/skills/* ~/.agents/skills/
+
+# Verificar
+ls ~/.agents/skills/
+```
+
+**Resultado esperado:**
+```
+dotnet-clean-cqrs    java-hexagonal-secure
+```
+
+---
+
+### Instalar en los 3 agentes de una vez
+
+Si usas los 3 agentes, podes instalar todo junto:
+
+#### macOS / Linux
+
+```bash
+SKILLS_SRC=~/Documents/skill-zzoft/skills
+
+# OpenCode
+mkdir -p ~/.config/opencode/skills && cp -r $SKILLS_SRC/* ~/.config/opencode/skills/
+
+# Claude Code
+mkdir -p ~/.claude/skills && cp -r $SKILLS_SRC/* ~/.claude/skills/
+
+# Codex
+mkdir -p ~/.agents/skills && cp -r $SKILLS_SRC/* ~/.agents/skills/
+```
+
+#### Windows (PowerShell)
+
+```powershell
+$src = "$env:USERPROFILE\Documents\skill-zzoft\skills\*"
+
+# OpenCode
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.config\opencode\skills"
+Copy-Item -Recurse -Force $src "$env:USERPROFILE\.config\opencode\skills\"
+
+# Claude Code
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.claude\skills"
+Copy-Item -Recurse -Force $src "$env:USERPROFILE\.claude\skills\"
+
+# Codex
+New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.agents\skills"
+Copy-Item -Recurse -Force $src "$env:USERPROFILE\.agents\skills\"
+```
+
+---
+
+## Paso 4: Verificar la instalacion
+
+### OpenCode
 
 ```bash
 opencode
+# Escribir: "que skills tenes disponibles?"
+# O usar /skill para listar
 ```
 
-3. Escribe un prompt que active la skill. Por ejemplo:
+### Claude Code
+
+```bash
+claude
+# Escribir: "que skills hay disponibles?"
+# O invocar directamente: /dotnet-clean-cqrs
+```
+
+### Codex
+
+```bash
+codex
+# Escribir /skills para ver la lista
+# O invocar: $dotnet-clean-cqrs
+```
+
+---
+
+## Paso 5: Probar una skill
+
+Escribe un prompt que active la skill automaticamente:
 
 ```
-Crea un microservicio .NET con Clean Architecture y CQRS para gestionar productos
+Crea un microservicio en .NET 9 para gestionar inventario de productos
+con Clean Architecture y CQRS. Necesito CRUD completo.
 ```
 
-Si la skill esta correctamente instalada, OpenCode la cargara automaticamente y seguira los patrones definidos en ella.
+El agente deberia:
+1. Detectar que necesita la skill `dotnet-clean-cqrs`
+2. Cargar las instrucciones de la skill
+3. Generar el proyecto siguiendo la arquitectura definida
 
 ---
 
 ## Instalacion por proyecto (alternativa)
 
-Si queres que las skills esten disponibles solo en un proyecto especifico en vez de globalmente:
+Si preferis que las skills esten solo en un proyecto especifico:
 
-### Windows (PowerShell)
-
-```powershell
-cd C:\ruta\a\tu\proyecto
-mkdir -Force .opencode\skills
-Copy-Item -Recurse -Force "$env:USERPROFILE\Documents\skill-zzoft\skills\*" ".\.opencode\skills\"
-```
-
-### macOS / Linux (Terminal)
+### OpenCode
 
 ```bash
 cd /ruta/a/tu/proyecto
@@ -189,51 +265,69 @@ mkdir -p .opencode/skills
 cp -r ~/Documents/skill-zzoft/skills/* .opencode/skills/
 ```
 
-> **Nota:** Las skills de proyecto tienen prioridad sobre las globales. Si tenes la misma skill en ambas ubicaciones, se usa la del proyecto.
+### Claude Code
+
+```bash
+cd /ruta/a/tu/proyecto
+mkdir -p .claude/skills
+cp -r ~/Documents/skill-zzoft/skills/* .claude/skills/
+```
+
+### Codex
+
+```bash
+cd /ruta/a/tu/proyecto
+mkdir -p .agents/skills
+cp -r ~/Documents/skill-zzoft/skills/* .agents/skills/
+```
 
 ---
 
 ## Actualizacion de skills
 
-Cuando se publiquen nuevas versiones de las skills:
-
-### Todos los sistemas operativos
+Cuando se publiquen nuevas versiones:
 
 ```bash
-# Ir al directorio donde clonaste el repo
-cd ~/Documents/skill-zzoft    # o donde lo hayas clonado
-
-# Traer los cambios
+cd ~/Documents/skill-zzoft
 git pull origin main
 
-# Volver a copiar las skills actualizadas
-# (usar el comando de copia de tu sistema operativo del Paso 3)
+# Volver a copiar al agente que uses (ver Paso 3)
 ```
 
 ---
 
-## Desinstalacion de una skill
+## Desinstalacion
 
-Para remover una skill especifica:
+### macOS / Linux
+
+```bash
+# OpenCode
+rm -rf ~/.config/opencode/skills/dotnet-clean-cqrs
+rm -rf ~/.config/opencode/skills/java-hexagonal-secure
+
+# Claude Code
+rm -rf ~/.claude/skills/dotnet-clean-cqrs
+rm -rf ~/.claude/skills/java-hexagonal-secure
+
+# Codex
+rm -rf ~/.agents/skills/dotnet-clean-cqrs
+rm -rf ~/.agents/skills/java-hexagonal-secure
+```
 
 ### Windows (PowerShell)
 
 ```powershell
-# Remover skill dotnet-clean-cqrs
+# OpenCode
 Remove-Item -Recurse -Force "$env:USERPROFILE\.config\opencode\skills\dotnet-clean-cqrs"
-
-# Remover skill java-hexagonal-secure
 Remove-Item -Recurse -Force "$env:USERPROFILE\.config\opencode\skills\java-hexagonal-secure"
-```
 
-### macOS / Linux (Terminal)
+# Claude Code
+Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\dotnet-clean-cqrs"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.claude\skills\java-hexagonal-secure"
 
-```bash
-# Remover skill dotnet-clean-cqrs
-rm -rf ~/.config/opencode/skills/dotnet-clean-cqrs
-
-# Remover skill java-hexagonal-secure
-rm -rf ~/.config/opencode/skills/java-hexagonal-secure
+# Codex
+Remove-Item -Recurse -Force "$env:USERPROFILE\.agents\skills\dotnet-clean-cqrs"
+Remove-Item -Recurse -Force "$env:USERPROFILE\.agents\skills\java-hexagonal-secure"
 ```
 
 ---
@@ -242,40 +336,57 @@ rm -rf ~/.config/opencode/skills/java-hexagonal-secure
 
 ### La skill no se activa automaticamente
 
-1. Verifica que el archivo `SKILL.md` existe en la ubicacion correcta:
-   ```bash
-   # Linux/macOS
-   cat ~/.config/opencode/skills/dotnet-clean-cqrs/SKILL.md
+1. Verificar que `SKILL.md` existe en la ruta correcta del agente
+2. Verificar que el frontmatter tiene `name` y `description`
+3. Reiniciar el agente (salir y volver a entrar)
+4. Probar invocacion manual (`/skill`, `/nombre-skill`, o `$nombre-skill`)
 
-   # Windows PowerShell
-   Get-Content "$env:USERPROFILE\.config\opencode\skills\dotnet-clean-cqrs\SKILL.md"
-   ```
+### El nombre de la carpeta no coincide
 
-2. Verifica que el frontmatter YAML tiene `name` y `description` correctos
-
-3. Reinicia OpenCode (salir y volver a entrar)
-
-### Error "skill not found"
-
-Asegurate de que la estructura de carpetas sea correcta:
+El nombre de la carpeta **DEBE** coincidir con el campo `name` en el frontmatter de `SKILL.md`:
 
 ```
+~/.claude/skills/dotnet-clean-cqrs/    <-- nombre carpeta
+                 └── SKILL.md
+                     name: dotnet-clean-cqrs  <-- debe coincidir
+```
+
+### Estructura correcta de archivos
+
+```
+# OpenCode
 ~/.config/opencode/skills/
 ├── dotnet-clean-cqrs/
-│   ├── SKILL.md          <-- ESTE ARCHIVO ES OBLIGATORIO
+│   ├── SKILL.md
 │   └── assets/
 │       └── docker-build.sh
 └── java-hexagonal-secure/
-    ├── SKILL.md          <-- ESTE ARCHIVO ES OBLIGATORIO
+    ├── SKILL.md
     └── references/
         └── structure.md
+
+# Claude Code (misma estructura, diferente ruta)
+~/.claude/skills/
+├── dotnet-clean-cqrs/
+│   └── ...
+└── java-hexagonal-secure/
+    └── ...
+
+# Codex (misma estructura, diferente ruta)
+~/.agents/skills/
+├── dotnet-clean-cqrs/
+│   └── ...
+└── java-hexagonal-secure/
+    └── ...
 ```
 
-El nombre de la carpeta DEBE coincidir con el campo `name` dentro del frontmatter de `SKILL.md`.
+### Comparacion rapida entre agentes
 
-### Los assets no se encuentran
-
-Los paths dentro de `SKILL.md` son relativos al directorio de la skill. Si un asset referencia `assets/docker-build.sh`, el archivo debe estar en:
-```
-~/.config/opencode/skills/dotnet-clean-cqrs/assets/docker-build.sh
-```
+| Caracteristica | OpenCode | Claude Code | Codex |
+|---------------|----------|-------------|-------|
+| Activacion automatica | Si | Si | Si (por defecto) |
+| Invocacion manual | `/skill` | `/nombre-skill` | `$nombre-skill` |
+| Listar skills | `/skill` | "que skills hay?" | `/skills` |
+| Estandar | Agent Skills | Agent Skills | Agent Skills |
+| Carpeta global | `~/.config/opencode/skills/` | `~/.claude/skills/` | `~/.agents/skills/` |
+| Carpeta proyecto | `.opencode/skills/` | `.claude/skills/` | `.agents/skills/` |

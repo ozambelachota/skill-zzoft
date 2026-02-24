@@ -2,16 +2,30 @@
 
 Genera microservicios .NET 9.0 siguiendo Clean Architecture y el patron CQRS (Command Query Responsibility Segregation).
 
+**Compatible con:** OpenCode | Claude Code | Codex
+
 ## Cuando se activa
 
-- Cuando pedis crear un nuevo microservicio o API en .NET
-- Cuando pedis refactorizar una app .NET existente a Clean Architecture
-- Cuando pedis implementar el patron CQRS
-- Cuando pedis configurar Docker para un servicio .NET
+La skill se activa automaticamente cuando le pedis al agente:
+
+- Crear un nuevo microservicio o API en .NET
+- Refactorizar una app .NET existente a Clean Architecture
+- Implementar el patron CQRS (Commands/Queries)
+- Configurar Docker para un servicio .NET
+
+### Invocacion manual
+
+| Agente | Comando |
+|--------|---------|
+| OpenCode | `/skill` y seleccionar `dotnet-clean-cqrs` |
+| Claude Code | `/dotnet-clean-cqrs` |
+| Codex | `$dotnet-clean-cqrs` |
+
+---
 
 ## Arquitectura que genera
 
-La skill fuerza la siguiente estructura de carpetas:
+La skill fuerza la siguiente estructura de carpetas siguiendo Clean Architecture:
 
 ```
 src/
@@ -38,6 +52,8 @@ API --> Infrastructure --> Application --> Domain
 - **Application** solo depende de Domain
 - **Infrastructure** depende de Application (y por transitividad de Domain)
 - **API** depende de Application e Infrastructure
+
+---
 
 ## Patron CQRS
 
@@ -100,7 +116,21 @@ public class GetItemQueryHandler : IRequestHandler<GetItemQuery, Result<ItemDto>
 
 ### Validacion
 
-Se usa **FluentValidation** con pipeline behaviors de **MediatR**.
+Se usa **FluentValidation** con pipeline behaviors de **MediatR**:
+
+```csharp
+public class CreateItemCommandValidator : AbstractValidator<CreateItemCommand>
+{
+    public CreateItemCommandValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty().WithMessage("El nombre es requerido")
+            .MaximumLength(200).WithMessage("El nombre no puede exceder 200 caracteres");
+    }
+}
+```
+
+---
 
 ## Comandos para crear el proyecto desde cero
 
@@ -123,6 +153,26 @@ dotnet add MiProyecto.API reference MiProyecto.Application MiProyecto.Infrastruc
 dotnet sln add **/*.csproj
 ```
 
+---
+
+## NuGet Packages recomendados
+
+```bash
+# Application layer
+dotnet add MiProyecto.Application package MediatR
+dotnet add MiProyecto.Application package FluentValidation
+dotnet add MiProyecto.Application package FluentValidation.DependencyInjectionExtensions
+
+# Infrastructure layer
+dotnet add MiProyecto.Infrastructure package Microsoft.EntityFrameworkCore
+dotnet add MiProyecto.Infrastructure package Npgsql.EntityFrameworkCore.PostgreSQL
+
+# API layer
+dotnet add MiProyecto.API package Swashbuckle.AspNetCore
+```
+
+---
+
 ## Docker (obligatorio)
 
 La skill SIEMPRE genera un script `docker-build.sh` en la raiz del proyecto con los comandos:
@@ -135,18 +185,35 @@ La skill SIEMPRE genera un script `docker-build.sh` en la raiz del proyecto con 
 | `./docker-build.sh logs` | Ver logs del contenedor |
 | `./docker-build.sh clean` | Limpiar contenedores e imagenes |
 
-## Ejemplo de uso con OpenCode
+---
+
+## Ejemplos de uso
+
+### Ejemplo basico
 
 ```
-Prompt: "Crea un microservicio en .NET 9 para gestionar el inventario de productos
-con Clean Architecture y CQRS. Necesito CRUD completo con validaciones."
+Crea un microservicio .NET 9 para gestionar inventario de productos
+con Clean Architecture y CQRS. Necesito CRUD completo con validaciones.
 ```
 
-La skill va a:
+### Ejemplo avanzado
 
-1. Crear la estructura de carpetas de Clean Architecture
-2. Generar las entidades en Domain
-3. Crear Commands y Queries en Application
-4. Implementar el repositorio con EF Core en Infrastructure
-5. Crear los Controllers en API
-6. Generar el `docker-build.sh`
+```
+Necesito un microservicio .NET 9 para el modulo de despacho.
+Debe tener:
+- Entidad Despacho con campos: id, fecha, destino, estado, items
+- CQRS completo: crear, listar, actualizar estado, obtener por id
+- Validacion con FluentValidation
+- EF Core con PostgreSQL
+- Docker build script
+```
+
+### Lo que el agente genera
+
+1. Estructura de carpetas Clean Architecture
+2. Entidades en Domain
+3. Commands y Queries en Application con Handlers
+4. Validators con FluentValidation
+5. Repositorio con EF Core en Infrastructure
+6. Controllers en API
+7. Script `docker-build.sh`
